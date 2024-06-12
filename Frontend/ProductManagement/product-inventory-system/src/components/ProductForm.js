@@ -185,13 +185,13 @@ const ProductForm = () => {
     }
     setError(null);
     try {
-      await axios.post('/api/products/', product);
+      await axios.post('/products/create/', product);
       // handle success (e.g., reset form, show success message)
     } catch (err) {
       setError('An error occurred while creating the product');
     }
   };
-
+  
   return (
     <div className="container mt-5">
       <div className="card">

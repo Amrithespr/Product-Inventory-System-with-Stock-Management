@@ -20,14 +20,39 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
+from rest_framework.routers import DefaultRouter
+from app.views import RegisterViewSet, LoginViewSet, ProductsViewSet, VariantViewSet, SubVariantViewSet, StockViewSet
+
+router = DefaultRouter()
+router.register(r'products', ProductsViewSet)
+router.register(r'variants', VariantViewSet)
+router.register(r'subvariants', SubVariantViewSet)
+router.register(r'stock', StockViewSet)
 
 
 urlpatterns = [
+    path('', include(router.urls)),
+    
     path('admin/', admin.site.urls),
+    
+    path('register/', RegisterViewSet.as_view({'post': 'create'}), name='register'),
+    path('login/', LoginViewSet.as_view({'post': 'create'}), name='login'),
+    path('subvariants/<uuid:pk>/add_stock/', SubVariantViewSet.as_view({'post': 'add_stock'}), name='subvariant-add-stock'),
+    path('subvariants/<uuid:pk>/remove_stock/', SubVariantViewSet.as_view({'post': 'remove_stock'}), name='subvariant-remove-stock'),
+
+    
+    
     path('api/',include('app.urls')),
+    
+    
 
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    
+    
+    
+
+

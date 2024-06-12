@@ -1,35 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const StockManagement = () => {
-  const [productId, setProductId] = useState('');
-  const [variantId, setVariantId] = useState('');
-  const [subVariantId, setSubVariantId] = useState('');
+  const [products, setProducts] = useState([]);
+  const [variants, setVariants] = useState([]);
+  const [subVariants, setSubVariants] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState('');
+  const [selectedVariant, setSelectedVariant] = useState('');
+  const [selectedSubVariant, setSelectedSubVariant] = useState('');
   const [stockChange, setStockChange] = useState(0);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setError(null); // Clear error message on input change
-    setSuccess(null); // Clear success message on input change
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-    if (name === 'productId') setProductId(value);
-    else if (name === 'variantId') setVariantId(value);
-    else if (name === 'subVariantId') setSubVariantId(value);
-    else if (name === 'stockChange') setStockChange(parseInt(value, 10));
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('/products/');
+      setProducts(response.data);
+    } catch (err) {
+      setError('Failed to fetch products');
+    }
+  };
+
+  const fetchVariants = async (productId) => {
+    try {
+      const response = await axios.get(`/products/${productId}/variants/`);
+      setVariants(response.data);
+    } catch (err) {
+      setError('Failed to fetch variants');
+    }
+  };
+
+  const fetchSubVariants = async (variantId) => {
+    try {
+      const response = await axios.get(`/variants/${variantId}/subvariants/`);
+      setSubVariants(response.data);
+    } catch (err) {
+      setError('Failed to fetch sub-variants');
+    }
+  };
+
+  const handleProductChange = (e) => {
+    const productId = e.target.value;
+    setSelectedProduct(productId);
+    fetchVariants(productId);
+    setVariants([]);
+    setSubVariants([]);
+    setSelectedVariant('');
+    setSelectedSubVariant('');
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleVariantChange = (e) => {
+    const variantId = e.target.value;
+    setSelectedVariant(variantId);
+    fetchSubVariants(variantId);
+    setSubVariants([]);
+    setSelectedSubVariant('');
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleSubVariantChange = (e) => {
+    setSelectedSubVariant(e.target.value);
+    setError(null);
+    setSuccess(null);
   };
 
   const handleStockChange = async (operation) => {
-    if (!productId || !variantId || !subVariantId || stockChange <= 0) {
+    if (!selectedProduct || !selectedVariant || !selectedSubVariant || stockChange <= 0) {
       setError('All fields are required and stock change must be a positive number');
       return;
     }
 
     try {
-      await axios.post(`/api/products/${productId}/variants/${variantId}/subVariants/${subVariantId}/stock`, {
-        operation,
-        amount: stockChange,
+      await axios.post(`/api/subvariants/${selectedSubVariant}/${operation}_stock/`, {
+        quantity: stockChange,
       });
       setSuccess(`Stock successfully ${operation === 'add' ? 'added' : 'removed'}`);
       setError(null);
@@ -50,46 +100,39 @@ const StockManagement = () => {
           {success && <div className="alert alert-success">{success}</div>}
           <form>
             <div className="mb-3">
-              <label className="form-label">Product ID:</label>
-              <input
-                type="text"
-                className="form-control"
-                name="productId"
-                value={productId}
-                onChange={handleInputChange}
-                required
-              />
+              <label className="form-label">Product:</label>
+              <select className="form-control" value={selectedProduct} onChange={handleProductChange}>
+                <option value="">Select Product</option>
+                {products.map(product => (
+                  <option key={product.id} value={product.id}>{product.product_name}</option>
+                ))}
+              </select>
             </div>
             <div className="mb-3">
-              <label className="form-label">Variant ID:</label>
-              <input
-                type="text"
-                className="form-control"
-                name="variantId"
-                value={variantId}
-                onChange={handleInputChange}
-                required
-              />
+              <label className="form-label">Variant:</label>
+              <select className="form-control" value={selectedVariant} onChange={handleVariantChange} disabled={!selectedProduct}>
+                <option value="">Select Variant</option>
+                {variants.map(variant => (
+                  <option key={variant.id} value={variant.id}>{variant.name}</option>
+                ))}
+              </select>
             </div>
             <div className="mb-3">
-              <label className="form-label">Sub-Variant ID:</label>
-              <input
-                type="text"
-                className="form-control"
-                name="subVariantId"
-                value={subVariantId}
-                onChange={handleInputChange}
-                required
-              />
+              <label className="form-label">Sub-Variant:</label>
+              <select className="form-control" value={selectedSubVariant} onChange={handleSubVariantChange} disabled={!selectedVariant}>
+                <option value="">Select Sub-Variant</option>
+                {subVariants.map(subVariant => (
+                  <option key={subVariant.id} value={subVariant.id}>{subVariant.name}</option>
+                ))}
+              </select>
             </div>
             <div className="mb-3">
               <label className="form-label">Stock Change:</label>
               <input
                 type="number"
                 className="form-control"
-                name="stockChange"
                 value={stockChange}
-                onChange={handleInputChange}
+                onChange={(e) => setStockChange(parseInt(e.target.value, 10))}
                 required
               />
             </div>

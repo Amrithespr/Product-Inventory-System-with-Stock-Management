@@ -46,6 +46,7 @@ class SubVariant(models.Model):
     variant = models.ForeignKey(Variant, related_name="sub_variants", on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
 
+
     class Meta:
         db_table = "SubVariant"
         verbose_name = _("sub variant")
@@ -55,3 +56,27 @@ class SubVariant(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Stock(models.Model):
+    product = models.ForeignKey(Products, related_name="stocks", on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, related_name="stocks", on_delete=models.CASCADE)
+    subvariant = models.ForeignKey(SubVariant, related_name="stocks", on_delete=models.CASCADE)
+    stock = models.PositiveIntegerField(default=0)  
+
+
+    class Meta:
+        db_table = "Stock"
+        verbose_name = _("stock")
+        verbose_name_plural = _("stock")
+        ordering = ["stock"]
+        unique_together = (("product", "variant", "subvariant", "stock"),)
+
+    def __str__(self):
+        return self.stock
+
+
+
+
+
+

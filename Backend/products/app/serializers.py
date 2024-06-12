@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import Products, Variant, SubVariant
+from django.contrib.auth.models import User
+from .models import Products, Variant, SubVariant , Stock
 
 
-class VariantSerializer(serializers.ModelSerializer):
+class StockSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Variant
+        model = Stock
         fields = '__all__'
-
 
 class SubVariantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,20 +14,30 @@ class SubVariantSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class VariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Variant
+        fields = '__all__'
+
 class ProductsSerializer(serializers.ModelSerializer):
+    variants = VariantSerializer(many=True, read_only=True)
+
     class Meta:
         model = Products
         fields = '__all__'
+        
+        
+
+    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [ 'username', 'email', 'password', 'confirmPassword']  # Add any additional fields you want to include
+
+        extra_kwargs = {
+            'password': {'write_only': True},  # Ensures password is not returned in responses
+        }
 
     def create(self, validated_data):
-        variants_data = validated_data.pop('variants')
-        product = Products.objects.create(**validated_data)
-
-        for variant_data in variants_data:
-            sub_variants_data = variant_data.pop('sub_variants')
-            variant = Variant.objects.create(product=product, **variant_data)
-
-            for sub_variant_data in sub_variants_data:
-                SubVariant.objects.create(variant=variant, **sub_variant_data)
-
-        return product
+        user = User.objects.create_user(**validated_data)  # Create a new user using create_user method of User model
+        return user

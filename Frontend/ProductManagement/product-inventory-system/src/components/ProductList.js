@@ -54,7 +54,7 @@
 // export default ProductList;
 
 import React, { useEffect, useState } from 'react';
-
+import axios from 'axios';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -63,87 +63,8 @@ const ProductList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Example dummy data
-        const dummyData = [
-          {
-            id: 1,
-            name: 'Shirt ',
-            variants: [
-              {
-                id: 1,
-                name: 'Size ',
-                subVariants: [
-                  { id: 1, name: 'Small' },
-                  { id: 2, name: 'Medium' },
-                  { id: 3, name: 'Large' },
-                ],
-              },
-              {
-                id: 2,
-                name: 'Color',
-                subVariants: [
-                  { id: 1, name: 'Red' },
-                  { id: 2, name: 'Blue' },
-                  { id: 3, name: 'Green' },
-                ],
-              },
-            ],
-          },
-          {
-            id: 2,
-            name: 'Pants ',
-            variants: [
-              {
-                id: 1,
-                name: 'Size ',
-                subVariants: [
-                  { id: 1, name: 'Small' },
-                  { id: 2, name: 'Medium' },
-                  { id: 3, name: 'Large' },
-                ],
-              },
-              {
-                id: 2,
-                name: 'Color',
-                subVariants: [
-                  { id: 1, name: 'Black' },
-                  { id: 2, name: 'Blue' },
-                  { id: 3, name: 'Brown' },
-                ],
-              },
-            ],
-          },
-          {
-            id: 3,
-            name: 'Top ',
-            variants: [
-              {
-                id: 1,
-                name: 'Size ',
-                subVariants: [
-                  { id: 1, name: 'Small' },
-                  { id: 2, name: 'Medium' },
-                  { id: 3, name: 'Large' },
-                ],
-              },
-              {
-                id: 2,
-                name: 'Color',
-                subVariants: [
-                  { id: 1, name: 'Black' },
-                  { id: 2, name: 'Blue' },
-                  { id: 3, name: 'Green' },
-                ],
-              },
-            ],
-          },
-
-          
-        ];
-        // Replace the next line with an API call if needed
-        // const response = await axios.get('/api/products');
-        // setProducts(response.data);
-        setProducts(dummyData);
+        const response = await axios.get('/products/');
+        setProducts(response.data);
       } catch (err) {
         setError('An error occurred while fetching products');
       }

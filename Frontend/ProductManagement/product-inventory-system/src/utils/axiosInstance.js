@@ -3,6 +3,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
+    // baseURL: 'http://localhost:8000/api/', // replace with your Django API URL
     baseURL: 'http://localhost:8000/api/', // replace with your Django API URL
     timeout: 5000,
 });
